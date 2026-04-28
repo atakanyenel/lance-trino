@@ -32,6 +32,10 @@ import org.apache.arrow.vector.types.pojo.Field;
 import org.apache.arrow.vector.types.pojo.FieldType;
 import org.lance.schema.LanceField;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
 import static io.trino.spi.type.BigintType.BIGINT;
 import static io.trino.spi.type.BooleanType.BOOLEAN;
 import static io.trino.spi.type.DateType.DATE;
@@ -124,6 +128,15 @@ public record LanceColumnHandle(
             return new ArrayType(elementType);
         }
 
+        // Handle Struct type - map to Trino RowType with child fields
+        if (type instanceof ArrowType.Struct) {
+            List<RowType.Field> rowFields = new ArrayList<>();
+            for (LanceField child : field.getChildren()) {
+                rowFields.add(new RowType.Field(Optional.of(child.getName()), toTrinoType(child)));
+            }
+            return RowType.from(rowFields);
+        }
+
         // For simple types, delegate to the ArrowType-based method
         return toTrinoType(type);
     }
@@ -214,6 +227,14 @@ public record LanceColumnHandle(
         // For structs that are blob fields, return VARBINARY
         if (type instanceof ArrowType.Struct && BlobUtils.isBlobArrowField(field)) {
             return VARBINARY;
+        }
+        // General struct support - map to Trino RowType
+        if (type instanceof ArrowType.Struct) {
+            List<RowType.Field> rowFields = new ArrayList<>();
+            for (Field child : field.getChildren()) {
+                rowFields.add(new RowType.Field(Optional.of(child.getName()), toTrinoType(child)));
+            }
+            return RowType.from(rowFields);
         }
         return toTrinoType(type);
     }
