@@ -326,7 +326,7 @@ public class LanceArrowToPageScanner
                 else if (type.equals(INTEGER)) {
                     if (vector instanceof UInt4Vector uint4Vector) {
                         writeVectorValues(output, vector,
-                                index -> type.writeLong(output, uint4Vector.get(index)), offset, length);
+                                index -> type.writeLong(output, Integer.toUnsignedLong(uint4Vector.get(index))), offset, length);
                     }
                     else {
                         writeVectorValues(output, vector, index -> type.writeLong(output, ((IntVector) vector).get(index)),
