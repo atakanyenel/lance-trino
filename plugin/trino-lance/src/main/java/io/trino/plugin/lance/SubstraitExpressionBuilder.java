@@ -48,6 +48,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 
@@ -142,7 +143,7 @@ public final class SubstraitExpressionBuilder
         for (Map.Entry<LanceColumnHandle, Domain> entry : domains.entrySet()) {
             LanceColumnHandle column = entry.getKey();
             Domain domain = entry.getValue();
-            Integer ordinal = columnOrdinals.get(column.name());
+            Integer ordinal = columnOrdinals.get(column.name().toLowerCase(Locale.ENGLISH));
             if (ordinal == null) {
                 continue;
             }
@@ -1184,7 +1185,7 @@ public final class SubstraitExpressionBuilder
 
         // Add LIKE expressions
         for (LikePredicate likePredicate : likePredicates) {
-            Integer ordinal = columnOrdinals.get(likePredicate.columnName());
+            Integer ordinal = columnOrdinals.get(likePredicate.columnName().toLowerCase(Locale.ENGLISH));
             if (ordinal != null) {
                 Type substraitType = trinoTypeToSubstrait(likePredicate.column().trinoType());
                 expressions.add(likeExpression(ordinal, substraitType, likePredicate.pattern()));
