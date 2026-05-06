@@ -845,8 +845,9 @@ public final class SubstraitExpressionBuilder
                     String pattern = slice.toStringUtf8();
                     if (isPushableLikePattern(pattern)) {
                         Type substraitType = trinoTypeToSubstrait(lanceColumn.trinoType());
-                        if (!columnNames.contains(columnName)) {
-                            columnNames.add(columnName);
+                        // Use original-case name from LanceColumnHandle for projection
+                        if (!columnNames.contains(lanceColumn.name())) {
+                            columnNames.add(lanceColumn.name());
                         }
                         return Optional.of(likeExpression(ordinal, substraitType, pattern));
                     }
@@ -876,8 +877,8 @@ public final class SubstraitExpressionBuilder
             if (columnHandle instanceof LanceColumnHandle lanceColumn && ordinal != null) {
                 if (isSupportedType(lanceColumn.trinoType())) {
                     Type substraitType = trinoTypeToSubstrait(lanceColumn.trinoType());
-                    if (!columnNames.contains(columnName)) {
-                        columnNames.add(columnName);
+                    if (!columnNames.contains(lanceColumn.name())) {
+                        columnNames.add(lanceColumn.name());
                     }
                     return Optional.of(isNullExpression(ordinal, substraitType));
                 }
@@ -983,8 +984,8 @@ public final class SubstraitExpressionBuilder
                 Type substraitType = trinoTypeToSubstrait(trinoType);
                 Expression fieldRef = fieldReference(ordinal, substraitType);
                 Expression literal = toLiteral(trinoType, constant.getValue(), substraitType);
-                if (!columnNames.contains(columnName)) {
-                    columnNames.add(columnName);
+                if (!columnNames.contains(lanceColumn.name())) {
+                    columnNames.add(lanceColumn.name());
                 }
                 return Optional.of(scalarFunction(functionKey, R.BOOLEAN, fieldRef, literal));
             }
@@ -1055,8 +1056,8 @@ public final class SubstraitExpressionBuilder
             }
 
             Expression fieldRef = fieldReference(ordinal, substraitType);
-            if (!columnNames.contains(columnName)) {
-                columnNames.add(columnName);
+            if (!columnNames.contains(lanceColumn.name())) {
+                columnNames.add(lanceColumn.name());
             }
             return Optional.of(Expression.SingleOrList.builder()
                     .condition(fieldRef)
