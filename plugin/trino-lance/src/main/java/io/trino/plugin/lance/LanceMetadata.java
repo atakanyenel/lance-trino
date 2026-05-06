@@ -105,6 +105,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -680,7 +681,7 @@ public class LanceMetadata
                 .toList();
         Map<String, Integer> ordinals = new HashMap<>();
         for (int i = 0; i < sortedColumns.size(); ++i) {
-            ordinals.put(sortedColumns.get(i).name(), i);
+            ordinals.put(sortedColumns.get(i).name().toLowerCase(Locale.ENGLISH), i);
         }
         return ordinals;
     }
