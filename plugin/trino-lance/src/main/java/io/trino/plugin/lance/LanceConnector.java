@@ -22,10 +22,12 @@ import io.trino.spi.connector.ConnectorPageSourceProvider;
 import io.trino.spi.connector.ConnectorSession;
 import io.trino.spi.connector.ConnectorSplitManager;
 import io.trino.spi.connector.ConnectorTransactionHandle;
+import io.trino.spi.procedure.Procedure;
 import io.trino.spi.session.PropertyMetadata;
 import io.trino.spi.transaction.IsolationLevel;
 
 import java.util.List;
+import java.util.Set;
 
 import static java.util.Objects.requireNonNull;
 
@@ -37,6 +39,7 @@ public class LanceConnector
     private final LanceSplitManager splitManager;
     private final LancePageSourceProvider pageSourceProvider;
     private final LancePageSinkProvider pageSinkProvider;
+    private final Set<Procedure> procedures;
 
     @Inject
     public LanceConnector(
@@ -44,13 +47,15 @@ public class LanceConnector
             LanceMetadata metadata,
             LanceSplitManager splitManager,
             LancePageSourceProvider pageSourceProvider,
-            LancePageSinkProvider pageSinkProvider)
+            LancePageSinkProvider pageSinkProvider,
+            LanceProcedures procedures)
     {
         this.lifeCycleManager = requireNonNull(lifeCycleManager, "lifeCycleManager is null");
         this.metadata = requireNonNull(metadata, "metadata is null");
         this.splitManager = requireNonNull(splitManager, "splitManager is null");
         this.pageSourceProvider = requireNonNull(pageSourceProvider, "pageSourceProvider is null");
         this.pageSinkProvider = requireNonNull(pageSinkProvider, "pageSinkProvider is null");
+        this.procedures = requireNonNull(procedures, "procedures is null").get();
     }
 
     @Override
@@ -88,6 +93,12 @@ public class LanceConnector
     public List<PropertyMetadata<?>> getTableProperties()
     {
         return LanceTableProperties.getTableProperties();
+    }
+
+    @Override
+    public Set<Procedure> getProcedures()
+    {
+        return procedures;
     }
 
     @Override

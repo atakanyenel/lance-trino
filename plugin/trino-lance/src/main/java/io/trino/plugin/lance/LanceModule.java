@@ -44,6 +44,9 @@ public class LanceModule
         jsonCodecBinder(binder).bindJsonCodec(LanceMergeCommitData.class);
         jsonCodecBinder(binder).bindJsonCodec(FragmentDeletion.class);
 
+        // Procedures
+        binder.bind(LanceProcedures.class).in(Scopes.SINGLETON);
+
         // Connector
         binder.bind(LanceConnector.class).in(Scopes.SINGLETON);
     }

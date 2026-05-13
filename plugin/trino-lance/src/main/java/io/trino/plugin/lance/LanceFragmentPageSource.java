@@ -107,7 +107,13 @@ public class LanceFragmentPageSource
             if (!columns.isEmpty()) {
                 optionsBuilder.columns(columns);
             }
-            optionsBuilder.batchSize(readBatchSize);
+            // Only set explicit batch size when there's no filter.
+            // When a filter is present, omitting batchSize lets Lance use pushdown_scan
+            // which leverages page-level zone maps (min/max stats) to skip entire data
+            // pages that cannot contain matching rows.
+            if (substraitFilter.isEmpty()) {
+                optionsBuilder.batchSize(readBatchSize);
+            }
             substraitFilter.ifPresent(optionsBuilder::substraitFilter);
             limit.ifPresent(optionsBuilder::limit);
 
@@ -116,9 +122,9 @@ public class LanceFragmentPageSource
                 optionsBuilder.withRowAddress(true);
             }
 
-            log.debug("Opening dataset scanner for %d fragments with batchSize: %d, substraitFilter: %s, limit: %s, withRowAddress: %s, user: %s, version: %s",
+            log.debug("Opening dataset scanner for %d fragments with batchSize: %s, substraitFilter: %s, limit: %s, withRowAddress: %s, user: %s, version: %s",
                     fragmentIds.size(),
-                    readBatchSize,
+                    substraitFilter.isEmpty() ? String.valueOf(readBatchSize) : "auto (pushdown_scan)",
                     substraitFilter.isPresent() ? "present" : "none",
                     limit.isPresent() ? limit.getAsLong() : "none",
                     includeRowAddress,
